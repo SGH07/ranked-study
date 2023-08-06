@@ -4,6 +4,8 @@ let elapsedTime = 0;
 let isFreeSeason = true;
 let rankSeasonCount = 0;
 let lastStatusChangeTime = 0;
+let minutesForTier = 0;
+let isTimerWork = false;
 
 document.getElementById('start').addEventListener('click', startTimer);
 document.getElementById('stop').addEventListener('click', stopTimer);
@@ -16,26 +18,26 @@ function updateTimer() {
   let currentTime = Date.now();
   elapsedTime = currentTime - startTime;
 
-  let minutesForTier = Math.floor((elapsedTime % 3600000) / 60000);
   let hours = Math.floor(elapsedTime / 3600000);
   let minutes = Math.floor((elapsedTime % 3600000) / 60000);
   let seconds = Math.floor((elapsedTime % 60000) / 1000);
 
   let formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   document.getElementById('timer').textContent = `시간: ${formattedTime}`;
+}
 
-  if (minutesForTier >= 25) {
-    document.getElementById('status').textContent = '현재 상태: 프리 시즌';
-    document.getElementById('nowtier').textContent = '';
-    minutesForTier = 0;
-    setTimeout(timeoutButGiHyunIsSexy, 300000);
-    minutesForTier = 0;
-    rankSeasonCount++;
-    document.getElementById('status').textContent = `현재 상태: 랭크 시즌 (진입 ${rankSeasonCount}회)`;
-    updateTier(rankSeasonCount);
-    return;
+setInterval(tierTimer, 1000);
+
+function tierTimer() {
+  if (isTimerWork === true) {
+    minutesForTier = minutesForTier + 1;
+    if (minutesForTier >= 1800) {
+      minutesForTier = 0;
+      rankSeasonCount++;
+      document.getElementById('status').textContent = `현재 상태: 랭크 시즌 (진입 ${rankSeasonCount}회)`;
+      updateTier(rankSeasonCount);
+    }
   }
-
   timerId = requestAnimationFrame(updateTimer);
 }
 
@@ -87,19 +89,12 @@ function updateTier(rankNumber) {
   }
 }
 
-
-
-function timeoutButGiHyunIsSexy() {
-  console.log("그래서 이 함수가 왜 있냐 하면")
-  console.log("5분 휴식시간 조정하려고 n초뒤 다시 시작 이런거 하려 했는데")
-  console.log("그게 안되더라")
-}
-  
 function startTimer() {
   if (startTime === null) {
     startTime = Date.now() - elapsedTime;
     lastStatusChangeTime = startTime;
     updateTimer();
+    isTimerWork = true;
   }
 }
 
@@ -108,5 +103,6 @@ function stopTimer() {
     cancelAnimationFrame(timerId);
     timerId = null;
     startTime = null;
+    isTimerWork = false;
   }
 }
